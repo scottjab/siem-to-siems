@@ -1,0 +1,31 @@
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage*.out
+
+# Binaries (common locations)
+/siem-to-siems
+/cmd/siem-to-siems/siem-to-siems
+/bin/
+/build/
+/dist/
+
+# Logs and data
+/logs/
+*.log
+*.ndjson
+
+# Local config
+/config.json
+.env
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+

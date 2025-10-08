@@ -1,0 +1,26 @@
+{
+  "tsnet": {
+    "hostname": "siem-to-siems",
+    "auth_key": ""
+  },
+  "server": {
+    "addr": ":8080"
+  },
+  "destinations": {
+    "ndjson": {
+      "directory": "./logs",
+      "rotate": "1h"
+    },
+    "http": [
+      {
+        "url": "https://example.com/ingest",
+        "token": "",
+        "journal_directory": "",
+        "initial_backoff": "1s",
+        "max_backoff": "1m"
+      }
+    ]
+  }
+}
+
+
