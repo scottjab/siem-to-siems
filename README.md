@@ -1,6 +1,6 @@
 siem-to-siems
 
-A small service that receives events over HTTP and fans them out to configured destinations.
+A small tsnet service that receives events over HTTP and fans them out to configured destinations.
 
 ## Build
 
