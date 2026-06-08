@@ -29,3 +29,10 @@ coverage*.out
 .idea/
 .vscode/
 
+# Nix build artifacts
+/result
+/result-*
+
+# Local Claude Code settings
+/.claude/
+
