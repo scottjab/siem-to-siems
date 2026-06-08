@@ -184,6 +184,38 @@ SIEMs:
 }
 ```
 
+## Docker
+
+A multi-stage `Dockerfile` is provided for non-Nix users: it builds with the
+official `golang` image and ships the static binary on a minimal `distroless`
+runtime (no shell, nonroot, ~27 MB total).
+
+```bash
+docker build -t siem-to-siems .
+
+docker run --rm \
+  -p 443:443 \
+  -e TS_AUTHKEY=tskey-auth-... \
+  -v "$PWD/config.json:/config.json:ro" \
+  -v siem-data:/data \
+  siem-to-siems
+```
+
+- The service reads its config from `/config.json` (`SIEM_TO_SIEMS_CONFIG`); mount
+  your file there (see `config.json.example`).
+- `TS_AUTHKEY` is used for first-time Tailscale registration when `tsnet.auth_key`
+  in the config is empty — keep the key in the environment, not the config.
+- `/data` holds tsnet node state (`$HOME/.config`) and any relative output paths
+  from the config (`./logs`, `./parquet`); persist it with a volume so the node
+  isn't re-registered on each restart.
+
+Or with the bundled `docker-compose.yml` (set `TS_AUTHKEY` in your shell or a
+`.env` file):
+
+```bash
+docker compose up -d
+```
+
 ## Nix
 
 A flake is provided:

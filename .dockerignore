@@ -1,0 +1,25 @@
+# VCS / tooling
+.git
+.gitignore
+.claude
+
+# Nix
+result
+result-*
+flake.nix
+flake.lock
+
+# Docs and container metadata (not needed in the build context)
+*.md
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Local runtime data and config (config.json may hold secrets)
+config.json
+logs/
+parquet/
+data/
+*.ndjson
+*.parquet
+*.log

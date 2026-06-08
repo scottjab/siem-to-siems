@@ -1,0 +1,20 @@
+services:
+  siem-to-siems:
+    build: .
+    # Or use a published image instead of building:
+    # image: ghcr.io/scottjab/siem-to-siems:latest
+    restart: unless-stopped
+    # tsnet auth key for first-time registration (kept out of the image/config).
+    # tsnet reads TS_AUTHKEY when tsnet.auth_key in the config is empty.
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+    volumes:
+      # Your config.json (see config.json.example), mounted read-only.
+      - ./config.json:/config.json:ro
+      # Persists tsnet node state and parquet/ndjson output.
+      - siem-data:/data
+    ports:
+      - "443:443"
+
+volumes:
+  siem-data:
