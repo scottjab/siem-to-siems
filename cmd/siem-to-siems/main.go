@@ -39,6 +39,22 @@ func main() {
 		defer ndw.Close()
 	}
 
+	if cfg.Destinations.Parquet != nil && cfg.Destinations.Parquet.Directory != "" {
+		p := cfg.Destinations.Parquet
+		ps, err := destinations.NewParquetSink(destinations.ParquetOptions{
+			OutputDir:       p.Directory,
+			RotateEvery:     config.ParseDurationOr(p.Rotate, 5*time.Minute),
+			JournalEvery:    config.ParseDurationOr(p.Journal, 5*time.Minute),
+			DailyMergeEvery: config.ParseDurationOr(p.DailyMerge, 24*time.Hour),
+			NDJSONEnabled:   p.NDJSONFiles,
+		})
+		if err != nil {
+			log.Fatalf("parquet sink init failed: %v", err)
+		}
+		sinks = append(sinks, ps)
+		defer ps.Close()
+	}
+
 	for _, h := range cfg.Destinations.HTTP {
 		opts := destinations.HTTPForwarderOptions{
 			JournalDirectory: h.JournalDirectory,

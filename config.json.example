@@ -11,6 +11,13 @@
       "directory": "./logs",
       "rotate": "1h"
     },
+    "parquet": {
+      "directory": "./parquet",
+      "rotate": "5m",
+      "journal": "5m",
+      "daily_merge": "24h",
+      "ndjson_files": false
+    },
     "http": [
       {
         "url": "https://example.com/ingest",

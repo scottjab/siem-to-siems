@@ -26,13 +26,24 @@ type ServerConfig struct {
 }
 
 type DestinationsConfig struct {
-	NDJSON *NDJSONConfig           `json:"ndjson"`
-	HTTP   []HTTPDestinationConfig `json:"http"`
+	NDJSON  *NDJSONConfig           `json:"ndjson"`
+	HTTP    []HTTPDestinationConfig `json:"http"`
+	Parquet *ParquetConfig          `json:"parquet"`
 }
 
 type NDJSONConfig struct {
 	Directory string `json:"directory"`
 	Rotate    string `json:"rotate"` // duration string (e.g., "10m", "1h")
+}
+
+// ParquetConfig configures the parquet destination, which parses Splunk-HEC-style
+// netlog event streams into structured parquet files. Durations mirror siem-to-parquet.
+type ParquetConfig struct {
+	Directory   string `json:"directory"`    // output dir for parquet (and optional ndjson) files
+	Rotate      string `json:"rotate"`       // rollup interval, e.g. "5m", "1h" (default 5m)
+	Journal     string `json:"journal"`      // journal flush interval, >=1m, used when rotate>journal (default 5m)
+	DailyMerge  string `json:"daily_merge"`  // daily consolidation interval, >=1h, "0" disables (default 24h)
+	NDJSONFiles bool   `json:"ndjson_files"` // also write raw events as network_<ts>.ndjson
 }
 
 type HTTPDestinationConfig struct {
