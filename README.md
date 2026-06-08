@@ -194,6 +194,57 @@ nix run  .#siem-to-siems         # build and run
 nix develop                      # dev shell with Go + gopls + staticcheck
 ```
 
+### NixOS module
+
+The flake exports a NixOS module (`nixosModules.siem-to-siems`, also `.default`) that
+runs the receiver as a hardened systemd service. It renders `config.json` from a
+freeform `settings` attribute (mapped 1:1 to the JSON schema above) and points the
+service at it via `SIEM_TO_SIEMS_CONFIG`.
+
+```nix
+{
+  inputs.siem-to-siems.url = "github:scottjab/siem-to-siems";
+
+  outputs = { nixpkgs, siem-to-siems, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      modules = [
+        siem-to-siems.nixosModules.default
+        {
+          services.siem-to-siems = {
+            enable = true;
+            openFirewall = true;
+            # Secrets stay out of the Nix store; tsnet reads TS_AUTHKEY when
+            # tsnet.auth_key is unset.
+            environmentFile = "/run/secrets/siem-to-siems.env"; # TS_AUTHKEY=tskey-...
+            settings = {
+              tsnet.hostname = "siem-to-siems";
+              server = { addr = ":443"; tls_enabled = true; };
+              destinations = {
+                ndjson = { directory = "/var/lib/siem-to-siems/logs"; rotate = "1h"; };
+                parquet = { directory = "/var/lib/siem-to-siems/parquet"; rotate = "5m"; daily_merge = "24h"; };
+                http = [ { url = "https://splunk.example.com:8088/services/collector/raw"; } ];
+              };
+            };
+          };
+        }
+      ];
+    };
+  };
+}
+```
+
+Notes:
+
+- `settings` keys are written verbatim to JSON, so use the schema names exactly
+  (`tls_enabled`, `daily_merge`, `ndjson_files`, `journal_directory`, …).
+- The service runs under a `DynamicUser` with `StateDirectory`/`HOME` at
+  `stateDir` (default `/var/lib/siem-to-siems`); tsnet state and relative output
+  paths land there. It is granted `CAP_NET_BIND_SERVICE` for binding `:443`.
+- `openFirewall` opens the port parsed from `settings.server.addr` (default 443).
+- Put **no secrets** in `settings` — the rendered file is world-readable in the
+  store. Use `environmentFile` for the Tailscale auth key and any HTTP tokens you
+  can supply via the environment.
+
 ## Requirements
 
 - Go 1.26+ (or use the provided Nix flake)
